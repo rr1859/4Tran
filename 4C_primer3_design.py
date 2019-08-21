@@ -1,7 +1,3 @@
-module load python3
-module loada biopython
-
-python3
 from Bio import SeqIO;import re;
 import numpy as np;
 from Bio.Seq import Seq
@@ -20,19 +16,19 @@ for o, a in myopts:
         re2=a
 
 record = SeqIO.read(open(filename), "fasta");
-record = SeqIO.read("IAPEz-int_consensus.fasta", "fasta");
-re1_re1_250 = re.findall(r'(?=('+re1+'.(?:.){250,}?'+re1+'))', str(record.seq))
-pos_matches = [m.start() for m in re.finditer(r'(?=('+re1+'.(?:.){250,}?'+re1+'))', str(record.seq))];
-primary_pos = [m.start() for m in re.finditer(re1, str(record.seq))];
-secondary_pos = [m.start() for m in re.finditer(re2, str(record.seq))];
+seq_lower=str(record.seq).lower()
+re1_re1_250 = re.findall(r'(?=('+re1+'.(?:.){250,}?'+re1+'))',seq_lower )
+pos_matches = [m.start() for m in re.finditer(r'(?=('+re1+'.(?:.){250,}?'+re1+'))', seq_lower)];
+primary_pos = [m.start() for m in re.finditer(re1, seq_lower)];
+secondary_pos = [m.start() for m in re.finditer(re2, seq_lower)];
 if(primary_pos[0]-secondary_pos[0] > 150 and primary_pos[0] > 250):
     print("beg")
-    re1_re1_250.append(str(record.seq)[secondary_pos[0]:primary_pos[0]])
+    re1_re1_250.append(seq_lower[secondary_pos[0]:primary_pos[0]])
     pos_matches.append(1)
-elif(secondary_pos[-1]-primary_pos[-1] > 150 and len(str(record.seq))-primary_pos[-1] > 250):
+elif(secondary_pos[-1]-primary_pos[-1] > 150 and len(seq_lower)-primary_pos[-1] > 250):
     print("end")
-    re1_re1_250.append(str(record.seq)[primary_pos[-1]:secondary_pos[-1]+len(re1)])
-    pos_matches.append(len(str(record.seq)))
+    re1_re1_250.append(seq_lower[primary_pos[-1]:secondary_pos[-1]+len(re1)])
+    pos_matches.append(len(seq_lower))
 
 valid_primer_seq = []
 valid_primer_seq_pos = []
@@ -66,7 +62,7 @@ for i in range(0, len(valid_primer_seq)):
         left_primer = right_seq[0:20]
         re1_onright = np.vstack((re1_onright, ['right'+str(i),right_seq,left_primer,str(valid_primer_seq_size[i]),v_s, str(len(v_s)),str(valid_primer_seq_pos[i])]))
 
-np.savetxt('re1_onright.txt', re1_onright[1:,:], delimiter='\t', fmt='%s')
-np.savetxt('re1_onleft.txt', re1_onleft[1:,:], delimiter='\t', fmt='%s')
+np.savetxt(filename+'_re1_onright.txt', re1_onright[1:,:], delimiter='\t', fmt='%s')
+np.savetxt(filename+'_re1_onleft.txt', re1_onleft[1:,:], delimiter='\t', fmt='%s')
 
 print('\n--files re1_onright.txt and re1_onleft.txt saved\n')
